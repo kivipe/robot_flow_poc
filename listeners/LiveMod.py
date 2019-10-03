@@ -22,11 +22,14 @@ class LiveMod(object):
     to modify executed cases dynamically.
 
     Usage:
-    robot --listener listeners\LiveMod.py test\demo1.robot
+    robot --listener listeners\\LiveMod.py test\\t1.robot
     """
 
     ROBOT_LISTENER_API_VERSION = 3
     MOD = 0
+
+    def __init__(self):
+        self.testlist=['test1', 'test2', 'test1', 'test1', 'End']
 
     def str2test(self, testname, tests):
         """ Return test case object based on testname. """
@@ -42,27 +45,34 @@ class LiveMod(object):
         # Copy available tests and clear the actual execution list
         self.orig_tests = copy.deepcopy(data.tests)
         data.tests.clear()
+        print("Tests cleared")
 
         # Append some case to execution list
         test_case = self.str2test('Start', self.orig_tests)
         data.tests.append(test_case)
 
     def start_test(self, data, result):
+        print("Start test")
         print("Running test: {}".format(data))
         print("Available tests: {}".format(data.parent.tests._items))
 
     def end_test(self, data, result):
         print("Ending test: {}".format(data))
-
-        # Append some case to execution list. This is just an example of
-        # flow control for testing purposes.
-        if self.MOD == 0:
-            test_case = self.str2test('Start', self.orig_tests)
+        print("Testlist: {}".format(self.testlist))
+        try:
+            test_case = self.str2test(self.testlist.pop(0), self.orig_tests)
             data.parent.tests.append(test_case)
-            self.MOD = 1
-        elif self.MOD == 1:
-            test_case = self.str2test('End', self.orig_tests)
-            data.parent.tests.append(test_case)
-            self.MOD = 2
+        except IndexError:
+            print("No more tests")
+        # # Append some case to execution list. This is just an example of
+        # # flow control for testing purposes.
+        # if self.MOD == 0:
+        #     test_case = self.str2test('Start', self.orig_tests)
+        #     data.parent.tests.append(test_case)
+        #     self.MOD = 1
+        # elif self.MOD == 1:
+        #     test_case = self.str2test('End', self.orig_tests)
+        #     data.parent.tests.append(test_case)
+        #     self.MOD = 2
 
         print("Available tests: {}".format(data.parent.tests._items))
